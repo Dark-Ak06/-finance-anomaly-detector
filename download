@@ -1,0 +1,28 @@
+"""
+finance-anomaly-detector
+========================
+Unsupervised anomaly detection for personal finance data
+using Isolation Forest implemented from scratch.
+
+Quick start
+-----------
+>>> from src import FinanceAnomalyDetector, generate_sample_data
+>>> df = generate_sample_data()
+>>> detector = FinanceAnomalyDetector(contamination=0.10)
+>>> results = detector.fit_predict(df)
+>>> print(detector.summary(results))
+"""
+
+from .detector import FinanceAnomalyDetector, AnomalyResult
+from .isolation_forest import IsolationForest
+from .features import FinanceFeatureEngineer
+from .data_loader import load_csv, generate_sample_data
+
+__all__ = [
+    "FinanceAnomalyDetector",
+    "AnomalyResult",
+    "IsolationForest",
+    "FinanceFeatureEngineer",
+    "load_csv",
+    "generate_sample_data",
+]
