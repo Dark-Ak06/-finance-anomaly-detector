@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0f14;
+  --bg2: #13161e;
+  --bg3: #1a1e28;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --accent: #6ee7b7;
+  --accent2: #818cf8;
+  --danger: #f87171;
+  --warn: #fbbf24;
+  --success: #34d399;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Sora', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.app { display: flex; flex-direction: column; gap: 0; }
+
+/* Header */
+.header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #6ee7b7, #818cf8);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+.header span { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+.header-actions { display: flex; gap: 8px; }
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--sans);
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--bg2); border-color: rgba(255,255,255,0.2); }
+.btn.primary {
+  background: var(--accent);
+  color: #0d1a12;
+  border-color: var(--accent);
+}
+.btn.primary:hover { background: #5ccfa6; }
+.btn.danger-btn {
+  background: transparent;
+  color: var(--danger);
+  border-color: rgba(248,113,113,0.3);
+}
+.btn.danger-btn:hover { background: rgba(248,113,113,0.1); }
+
+/* Nav tabs */
+.nav {
+  display: flex;
+  gap: 0;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.nav-tab {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Main content */
+.main { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Stats row */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-size: 22px; font-weight: 600; font-family: var(--mono); letter-spacing: -1px; }
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.stat-card.danger { border-color: rgba(248,113,113,0.2); }
+.stat-card.danger .stat-value { color: var(--danger); }
+.stat-card.success .stat-value { color: var(--success); }
+.stat-card.warn .stat-value { color: var(--warn); }
+
+/* Grid layout */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+/* Panel */
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.panel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-title .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.panel-title .dot.red { background: var(--danger); }
+.panel-body { padding: 16px; }
+
+/* Chart canvas */
+canvas { display: block; width: 100% !important; }
+
+/* Transaction table */
+.tx-table { width: 100%; border-collapse: collapse; }
+.tx-table th {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  padding: 0 12px 8px;
+  text-align: left;
+  font-weight: 500;
+}
+.tx-table td {
+  padding: 8px 12px;
+  font-size: 12px;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+}
+.tx-table tr:hover td { background: rgba(255,255,255,0.02); }
+.tx-table .amount { text-align: right; }
+.tx-table .amount.neg { color: var(--danger); }
+.tx-table .amount.pos { color: var(--success); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  font-family: var(--sans);
+}
+.badge.anomaly { background: rgba(248,113,113,0.15); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+.badge.normal { background: rgba(52,211,153,0.1); color: var(--success); border: 1px solid rgba(52,211,153,0.2); }
+.badge.warn { background: rgba(251,191,36,0.1); color: var(--warn); border: 1px solid rgba(251,191,36,0.2); }
+
+/* Score bar */
+.score-bar { width: 60px; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 6px; }
+.score-fill { height: 100%; border-radius: 2px; background: var(--success); transition: width 0.3s; }
+.score-fill.high { background: var(--danger); }
+.score-fill.mid { background: var(--warn); }
+
+/* Add form */
+.add-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+input, select {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: var(--sans);
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus { border-color: var(--accent); }
+select option { background: var(--bg3); }
+
+/* Category chips */
+.cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* ML info box */
+.ml-info {
+  background: rgba(129,140,248,0.06);
+  border: 1px solid rgba(129,140,248,0.15);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.ml-info strong { color: var(--accent2); }
+
+/* Scatter plot tooltip */
+.tooltip-box {
+  position: absolute;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  pointer-events: none;
+  display: none;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* Tabs hidden */
+.tab-content { display: none; }
+.tab-content.active { display: flex; flex-direction: column; gap: 20px; }
+
+/* Scrollable table */
+.table-scroll { max-height: 280px; overflow-y: auto; }
+.table-scroll::-webkit-scrollbar { width: 4px; }
+.table-scroll::-webkit-scrollbar-track { background: var(--bg2); }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* File upload */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+}
+.upload-zone:hover { border-color: var(--accent); color: var(--text); background: rgba(110,231,183,0.03); }
+
+/* Model params */
+.param-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.param-label { font-size: 12px; color: var(--muted); min-width: 160px; }
+.param-value { font-family: var(--mono); font-size: 12px; color: var(--accent); min-width: 40px; text-align: right; }
+input[type=range] {
+  flex: 1;
+  padding: 0;
+  height: 4px;
+  accent-color: var(--accent);
+}
+
+.category-colors {
+  food: '#6ee7b7', shopping: '#818cf8', transport: '#fbbf24', health: '#f87171', entertainment: '#34d399', salary: '#60a5fa', other: '#9ca3af'
+}
+
+@media (max-width: 640px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .add-form { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">⬡</div>
+    <div>
+      <h1>FinanceML · Anomaly Detector</h1>
+      <span>Isolation Forest · Real-time scoring</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn" onclick="exportCSV()">↓ Export CSV</button>
+    <button class="btn primary" onclick="retrainModel()">⟳ Retrain Model</button>
+  </div>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <div class="nav-tab active" onclick="switchTab('dashboard', this)">Dashboard</div>
+  <div class="nav-tab" onclick="switchTab('transactions', this)">Transactions</div>
+  <div class="nav-tab" onclick="switchTab('model', this)">ML Model</div>
+  <div class="nav-tab" onclick="switchTab('add', this)">+ Add</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- DASHBOARD TAB -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Transactions</div>
+        <div class="stat-value" id="st-total">—</div>
+        <div class="stat-sub">last 30 days</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-label">Anomalies Found</div>
+        <div class="stat-value" id="st-anomalies">—</div>
+        <div class="stat-sub" id="st-anom-pct">—% of total</div>
+      </div>
+      <div class="stat-card warn">
+        <div class="stat-label">Total Spending</div>
+        <div class="stat-value" id="st-spending">—</div>
+        <div class="stat-sub">₸ Kazakhstan tenge</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">Avg Transaction</div>
+        <div class="stat-value" id="st-avg">—</div>
+        <div class="stat-sub">₸ per transaction</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Spending over time chart -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title"><span class="dot"></span>Spending Over Time</span>
+          <span style="font-size:11px;color:var(--muted)">daily · ₸</span>
+        </div>
+        <div class="panel-body">
+          <div style="position:relative;height:180px;"><canvas id="timeChart"></canvas></div>
+        </div>
+      </div>
+      <!-- Category pie -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title"><span class="dot"></span>By Category</span>
+        </div>
+        <div class="panel-body" style="display:flex;gap:16px;align-items:center">
+          <div style="position:relative;height:160px;width:160px;flex-shrink:0"><canvas id="catChart"></canvas></div>
+          <div id="cat-legend" style="display:flex;flex-direction:column;gap:6px;font-size:11px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anomaly scatter + top anomalies -->
+    <div class="grid-3">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title"><span class="dot red"></span>Anomaly Scatter Plot</span>
+          <span style="font-size:11px;color:var(--muted)">Amount vs Hour · colored by score</span>
+        </div>
+        <div class="panel-body" style="position:relative">
+          <div style="position:relative;height:220px;"><canvas id="scatterChart"></canvas></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title"><span class="dot red"></span>Top Anomalies</span>
+        </div>
+        <div class="panel-body">
+          <div id="top-anomalies" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS TAB -->
+  <div class="tab-content" id="tab-transactions">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="dot"></span>All Transactions</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="filter-cat" onchange="renderTable()" style="font-size:11px;padding:4px 8px">
+            <option value="">All categories</option>
+            <option>Food</option><option>Shopping</option><option>Transport</option>
+            <option>Health</option><option>Entertainment</option><option>Salary</option><option>Other</option>
+          </select>
+          <select id="filter-status" onchange="renderTable()" style="font-size:11px;padding:4px 8px">
+            <option value="">All</option>
+            <option value="anomaly">Anomalies only</option>
+            <option value="normal">Normal only</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="tx-table" id="tx-table">
+          <thead>
+            <tr>
+              <th>Date</th><th>Description</th><th>Category</th>
+              <th style="text-align:right">Amount ₸</th>
+              <th>Hour</th><th>ML Score</th><th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tx-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ML MODEL TAB -->
+  <div class="tab-content" id="tab-model">
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title"><span class="dot"></span>Model Parameters</span>
+        </div>
+        <div class="panel-body">
+          <div class="param-row">
+            <span class="param-label">Contamination (anomaly %)</span>
+            <input type="range" min="1" max="30" value="10" id="param-cont" oninput="document.getElementById('pv-cont').textContent=this.value+'%'">
+            <span class="param-value" id="pv-cont">10%</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">N Estimators (trees)</span>
+            <input type="range" min="10" max="200" value="100" step="10" id="param-est" oninput="document.getElementById('pv-est').textContent=this.value">
+            <span class="param-value" id="pv-est">100</span>
+          </div>
+          <div class="param-row">
+            <span class="param-label">Max Samples</span>
+            <input type="range" min="10" max="100" value="50" id="param-samp" oninput="document.getElementById('pv-samp').textContent=this.value+'%'">
+            <span class="param-value" id="pv-samp">50%</span>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn primary" onclick="retrainModel()" style="width:100%">⟳ Retrain with new params</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title"><span class="dot"></span>Feature Importance</span>
+        </div>
+        <div class="panel-body">
+          <div style="position:relative;height:200px;"><canvas id="featChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="dot"></span>How Isolation Forest Works</span>
+      </div>
+      <div class="panel-body">
+        <div class="ml-info">
+          <strong>Isolation Forest</strong> — алгоритм машинного обучения для детекции аномалий. Основная идея:<br><br>
+          🌲 <strong>Принцип:</strong> Аномальные точки легче "изолировать" в дереве решений — им нужно меньше разбиений.<br>
+          📊 <strong>Признаки:</strong> amount, hour_of_day, day_of_week, category_encoded, amount_zscore, hour_sin, hour_cos<br>
+          🎯 <strong>Anomaly Score:</strong> чем ближе к 1.0 — тем аномальнее транзакция. Порог: контаминация × max_score<br>
+          ⚡ <strong>Сложность:</strong> O(n log n) — работает в реальном времени даже на больших датасетах<br><br>
+          Этот проект демонстрирует: <strong>feature engineering</strong>, <strong>unsupervised ML</strong>, <strong>real-time scoring</strong>.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="dot"></span>Anomaly Score Distribution</span>
+      </div>
+      <div class="panel-body">
+        <div style="position:relative;height:160px;"><canvas id="distChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD TAB -->
+  <div class="tab-content" id="tab-add">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="dot"></span>Add Transaction</span>
+      </div>
+      <div class="panel-body">
+        <div class="add-form">
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <input type="text" id="add-desc" placeholder="Magnum supermarket...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₸)</label>
+            <input type="number" id="add-amount" placeholder="5000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="add-cat">
+              <option>Food</option><option>Shopping</option><option>Transport</option>
+              <option>Health</option><option>Entertainment</option><option>Salary</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">&nbsp;</label>
+            <button class="btn primary" onclick="addTransaction()">+ Add & Score</button>
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Hour of day (0–23)</label>
+            <div style="display:flex;align-items:center;gap:12px">
+              <input type="range" id="add-hour" min="0" max="23" value="14" style="flex:1" oninput="document.getElementById('hour-label').textContent=this.value+':00'">
+              <span class="param-value" id="hour-label">14:00</span>
+            </div>
+          </div>
+        </div>
+        <div id="add-result" style="margin-top:16px;display:none;" class="ml-info"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><span class="dot"></span>Upload CSV</span>
+        <span style="font-size:11px;color:var(--muted)">date, description, amount, category</span>
+      </div>
+      <div class="panel-body">
+        <div class="upload-zone" onclick="document.getElementById('csv-file').click()">
+          <div style="font-size:24px;margin-bottom:8px">📂</div>
+          <div style="font-weight:500;margin-bottom:4px">Click to upload CSV</div>
+          <div style="font-size:11px">Format: date, description, amount, category</div>
+          <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="uploadCSV(event)">
+        </div>
+        <div id="upload-status" style="margin-top:12px;display:none;" class="ml-info"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CATEGORIES = ['Food','Shopping','Transport','Health','Entertainment','Salary','Other'];
+const CAT_COLORS = {
+  Food:'#6ee7b7', Shopping:'#818cf8', Transport:'#fbbf24',
+  Health:'#f87171', Entertainment:'#34d399', Salary:'#60a5fa', Other:'#9ca3af'
+};
+
+function randBetween(a,b){ return Math.random()*(b-a)+a; }
+function randInt(a,b){ return Math.floor(randBetween(a,b)); }
+
+// Generate realistic transaction data
+function generateData() {
+  const txs = [];
+  const now = new Date();
+  const catAmounts = {
+    Food:[800,5000], Shopping:[2000,30000], Transport:[200,3000],
+    Health:[1000,15000], Entertainment:[500,8000], Salary:[150000,300000], Other:[500,10000]
+  };
+  for(let i=0; i<80; i++){
+    const cat = CATEGORIES[randInt(0,6)];
+    const range = catAmounts[cat];
+    const d = new Date(now);
+    d.setDate(d.getDate() - randInt(0,29));
+    txs.push({
+      id: i+1,
+      date: d.toISOString().split('T')[0],
+      description: getDesc(cat),
+      amount: cat==='Salary' ? randBetween(range[0],range[1]) : -randBetween(range[0],range[1]),
+      category: cat,
+      hour: cat==='Salary' ? randInt(9,17) : randInt(8,22),
+      day: d.getDay()
+    });
+  }
+  // inject anomalies
+  const anomDescs = ['SUSPICIOUS TRANSFER','Unknown merchant 3am','Crypto Exchange','Large cash ATM','International Wire'];
+  for(let i=0; i<8; i++){
+    const d = new Date(now);
+    d.setDate(d.getDate() - randInt(0,29));
+    txs.push({
+      id: 100+i,
+      date: d.toISOString().split('T')[0],
+      description: anomDescs[i%anomDescs.length],
+      amount: -randBetween(80000,500000),
+      category: CATEGORIES[randInt(0,5)],
+      hour: randInt(0,5),
+      day: d.getDay()
+    });
+  }
+  txs.sort((a,b)=>b.date.localeCompare(a.date));
+  return txs;
+}
+
+const descMap = {
+  Food:['Magnum Market','Döner Kebab','Chapan supermarket','Coffee Lab','KazMart','Ramstore'],
+  Shopping:['Sulpak electronics','Megaphone store','H&M Almaty','Wildberries KZ','IPORT'],
+  Transport:['Yandex Go','Bolt taxi','Astana Airlines','Bus ticket','Parking'],
+  Health:['City Clinic','Pharmacy 36.6','Medline lab','Dentist','Fitlife gym'],
+  Entertainment:['Chaplin Cinema','Steam purchase','Netflix KZ','Concert ticket','Billiard club'],
+  Salary:['Salary February','Bonus Q1','Freelance payment','Consulting fee'],
+  Other:['Utility bill','Internet Beeline','Mobile top-up','Insurance','Transfer']
+};
+function getDesc(cat){ const arr=descMap[cat]; return arr[randInt(0,arr.length)]; }
+
+let transactions = generateData();
+
+// ============================================================
+// ISOLATION FOREST (JavaScript implementation)
+// ============================================================
+class IsolationTree {
+  constructor(maxDepth){ this.maxDepth = maxDepth; this.root = null; }
+
+  build(data, depth=0){
+    if(depth>=this.maxDepth || data.length<=1) return {size:data.length, isLeaf:true};
+    const feat = Math.floor(Math.random()*data[0].length);
+    const vals = data.map(d=>d[feat]);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    if(min===max) return {size:data.length, isLeaf:true};
+    const split = randBetween(min,max);
+    const left = data.filter(d=>d[feat]<split);
+    const right = data.filter(d=>d[feat]>=split);
+    return {feat, split, left:this.build(left,depth+1), right:this.build(right,depth+1), isLeaf:false};
+  }
+
+  pathLength(node, x, depth=0){
+    if(node.isLeaf) return depth + c(node.size);
+    return x[node.feat] < node.split
+      ? this.pathLength(node.left, x, depth+1)
+      : this.pathLength(node.right, x, depth+1);
+  }
+}
+
+function c(n){ return n<=1 ? 0 : 2*(Math.log(n-1)+0.5772156649) - 2*(n-1)/n; }
+
+class IsolationForest {
+  constructor(nTrees=100, maxSamples=50, contamination=0.1){
+    this.nTrees = nTrees;
+    this.maxSamples = maxSamples;
+    this.contamination = contamination;
+    this.trees = [];
+    this.threshold = 0;
+  }
+
+  fit(X){
+    const maxDepth = Math.ceil(Math.log2(this.maxSamples));
+    this.trees = [];
+    for(let i=0;i<this.nTrees;i++){
+      const sample = [];
+      for(let j=0;j<this.maxSamples;j++) sample.push(X[randInt(0,X.length)]);
+      const t = new IsolationTree(maxDepth);
+      t.root = t.build(sample);
+      this.trees.push(t);
+    }
+    const scores = X.map(x=>this.anomalyScore(x));
+    scores.sort((a,b)=>b-a);
+    this.threshold = scores[Math.floor(scores.length*this.contamination)] || 0.6;
+  }
+
+  anomalyScore(x){
+    const avgPath = this.trees.reduce((s,t)=>s+t.pathLength(t.root,x),0)/this.trees.length;
+    const n = this.maxSamples;
+    return Math.pow(2, -avgPath/c(n));
+  }
+
+  predict(x){ return this.anomalyScore(x) >= this.threshold ? 'anomaly' : 'normal'; }
+}
+
+// ============================================================
+// FEATURE ENGINEERING
+// ============================================================
+function extractFeatures(tx, stats){
+  const amt = Math.abs(tx.amount);
+  return [
+    amt / (stats.maxAmt || 1),
+    tx.hour / 23,
+    tx.day / 6,
+    CATEGORIES.indexOf(tx.category) / CATEGORIES.length,
+    (amt - stats.meanAmt) / (stats.stdAmt || 1),
+    Math.sin(2*Math.PI*tx.hour/24),
+    Math.cos(2*Math.PI*tx.hour/24)
+  ];
+}
+
+let model = new IsolationForest();
+let featureStats = {};
+
+function computeStats(txs){
+  const amts = txs.map(t=>Math.abs(t.amount));
+  const mean = amts.reduce((a,b)=>a+b,0)/amts.length;
+  const std = Math.sqrt(amts.reduce((s,x)=>s+(x-mean)**2,0)/amts.length);
+  return { meanAmt:mean, stdAmt:std, maxAmt:Math.max(...amts) };
+}
+
+function trainModel(){
+  featureStats = computeStats(transactions);
+  const cont = parseInt(document.getElementById('param-cont').value)/100;
+  const nEst = parseInt(document.getElementById('param-est').value);
+  const samp = parseInt(document.getElementById('param-samp').value);
+  model = new IsolationForest(nEst, Math.max(10,Math.floor(transactions.length*samp/100)), cont);
+  const X = transactions.map(t=>extractFeatures(t,featureStats));
+  model.fit(X);
+  // score all transactions
+  transactions.forEach(t=>{
+    const f = extractFeatures(t,featureStats);
+    t.score = model.anomalyScore(f);
+    t.status = model.predict(f);
+  });
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+let charts = {};
+
+function initCharts(){
+  // Time chart
+  const timeDays = {};
+  transactions.forEach(t=>{
+    if(t.amount<0){ timeDays[t.date]=(timeDays[t.date]||0)+Math.abs(t.amount); }
+  });
+  const sortedDays = Object.keys(timeDays).sort().slice(-14);
+  if(charts.time) charts.time.destroy();
+  charts.time = new Chart(document.getElementById('timeChart'),{
+    type:'line',
+    data:{
+      labels:sortedDays.map(d=>d.slice(5)),
+      datasets:[{
+        label:'Spending ₸',
+        data:sortedDays.map(d=>Math.round(timeDays[d]||0)),
+        borderColor:'#6ee7b7',
+        backgroundColor:'rgba(110,231,183,0.08)',
+        fill:true,
+        tension:0.4,
+        pointBackgroundColor:sortedDays.map(d=>{
+          const hasAnom = transactions.some(t=>t.date===d&&t.status==='anomaly');
+          return hasAnom?'#f87171':'#6ee7b7';
+        }),
+        pointRadius:sortedDays.map(d=>{
+          const hasAnom = transactions.some(t=>t.date===d&&t.status==='anomaly');
+          return hasAnom?5:3;
+        })
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b7280',font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b7280',font:{size:10},callback:v=>v>=1000?Math.round(v/1000)+'k':v}}
+      }
+    }
+  });
+
+  // Category donut
+  const catTotals = {};
+  CATEGORIES.forEach(c=>catTotals[c]=0);
+  transactions.filter(t=>t.amount<0).forEach(t=>catTotals[t.category]+=Math.abs(t.amount));
+  const catData = CATEGORIES.map(c=>Math.round(catTotals[c]));
+  if(charts.cat) charts.cat.destroy();
+  charts.cat = new Chart(document.getElementById('catChart'),{
+    type:'doughnut',
+    data:{
+      labels:CATEGORIES,
+      datasets:[{
+        data:catData,
+        backgroundColor:CATEGORIES.map(c=>CAT_COLORS[c]),
+        borderWidth:0,
+        hoverOffset:4
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      cutout:'68%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ₸${Math.round(ctx.raw/1000)}k`}}}
+    }
+  });
+
+  // Legend
+  const leg = document.getElementById('cat-legend');
+  const total = catData.reduce((a,b)=>a+b,0);
+  leg.innerHTML = CATEGORIES.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span style="width:8px;height:8px;border-radius:2px;background:${CAT_COLORS[c]};flex-shrink:0"></span>
+      <span style="color:var(--muted)">${c}</span>
+      <span style="margin-left:auto;color:var(--text);font-family:var(--mono);font-size:11px">${total>0?Math.round(catData[i]/total*100):0}%</span>
+    </div>
+  `).join('');
+
+  // Scatter
+  const scatterData = transactions.map(t=>({
+    x:t.hour,
+    y:Math.abs(t.amount),
+    r:t.status==='anomaly'?7:4,
+    label:t.description,
+    score:t.score||0,
+    status:t.status
+  }));
+  if(charts.scatter) charts.scatter.destroy();
+  charts.scatter = new Chart(document.getElementById('scatterChart'),{
+    type:'bubble',
+    data:{
+      datasets:[{
+        label:'Normal',
+        data:scatterData.filter(d=>d.status==='normal'),
+        backgroundColor:'rgba(110,231,183,0.5)',
+        borderColor:'rgba(110,231,183,0.8)',
+        borderWidth:1
+      },{
+        label:'Anomaly',
+        data:scatterData.filter(d=>d.status==='anomaly'),
+        backgroundColor:'rgba(248,113,113,0.5)',
+        borderColor:'rgba(248,113,113,0.9)',
+        borderWidth:1
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:true,
+          labels:{color:'#6b7280',font:{size:10},boxWidth:8,padding:10}
+        }
+      },
+      scales:{
+        x:{
+          title:{display:true,text:'Hour of day',color:'#6b7280',font:{size:10}},
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{color:'#6b7280',font:{size:10}},
+          min:-1, max:24
+        },
+        y:{
+          title:{display:true,text:'Amount ₸',color:'#6b7280',font:{size:10}},
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{color:'#6b7280',font:{size:10},callback:v=>v>=1000?Math.round(v/1000)+'k':v},
+          min:0
+        }
+      }
+    }
+  });
+
+  // Feature importance (simulated)
+  const features = ['Amount','Hour','Day','Category','Z-score','Hour sin','Hour cos'];
+  const importance = [0.38,0.22,0.12,0.10,0.09,0.05,0.04];
+  if(charts.feat) charts.feat.destroy();
+  charts.feat = new Chart(document.getElementById('featChart'),{
+    type:'bar',
+    data:{
+      labels:features,
+      datasets:[{
+        label:'Importance',
+        data:importance,
+        backgroundColor:features.map((_,i)=>i===0?'#6ee7b7':i===1?'#818cf8':'rgba(110,231,183,0.4)'),
+        borderWidth:0,
+        borderRadius:4
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b7280',font:{size:10}}},
+        y:{grid:{display:false},ticks:{color:'#6b7280',font:{size:10}}}
+      }
+    }
+  });
+
+  // Score distribution
+  const scores = transactions.map(t=>t.score||0);
+  const bins = 20;
+  const binData = new Array(bins).fill(0);
+  const binLabels = [];
+  for(let i=0;i<bins;i++){
+    binLabels.push((i/bins).toFixed(2));
+    scores.forEach(s=>{ if(s>=i/bins && s<(i+1)/bins) binData[i]++; });
+  }
+  if(charts.dist) charts.dist.destroy();
+  charts.dist = new Chart(document.getElementById('distChart'),{
+    type:'bar',
+    data:{
+      labels:binLabels,
+      datasets:[{
+        label:'Count',
+        data:binData,
+        backgroundColor:binLabels.map(l=>parseFloat(l)>=(model.threshold||0.6)?'rgba(248,113,113,0.6)':'rgba(110,231,183,0.4)'),
+        borderWidth:0,
+        borderRadius:2
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        annotation:{}
+      },
+      scales:{
+        x:{ticks:{color:'#6b7280',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.03)'}},
+        y:{ticks:{color:'#6b7280',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}}
+      }
+    }
+  });
+}
+
+// ============================================================
+// STATS & TABLE
+// ============================================================
+function updateStats(){
+  const anomalies = transactions.filter(t=>t.status==='anomaly');
+  const spending = transactions.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
+  const avg = spending / transactions.filter(t=>t.amount<0).length;
+
+  document.getElementById('st-total').textContent = transactions.length;
+  document.getElementById('st-anomalies').textContent = anomalies.length;
+  document.getElementById('st-anom-pct').textContent = Math.round(anomalies.length/transactions.length*100)+'% of total';
+  document.getElementById('st-spending').textContent = '₸'+Math.round(spending/1000)+'k';
+  document.getElementById('st-avg').textContent = '₸'+Math.round(avg/1000)+'k';
+}
+
+function updateTopAnomalies(){
+  const anoms = transactions.filter(t=>t.status==='anomaly').sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5);
+  const el = document.getElementById('top-anomalies');
+  el.innerHTML = anoms.map(t=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.description}</div>
+        <div style="font-size:10px;color:var(--muted)">${t.date} · ${t.hour}:00 · ${t.category}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--mono);color:var(--danger);font-size:12px">₸${Math.round(Math.abs(t.amount)/1000)}k</div>
+        <div style="font-size:10px;color:var(--muted)">score: ${(t.score||0).toFixed(3)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTable(){
+  const catFilter = document.getElementById('filter-cat').value;
+  const statusFilter = document.getElementById('filter-status').value;
+  let filtered = transactions;
+  if(catFilter) filtered = filtered.filter(t=>t.category===catFilter);
+  if(statusFilter) filtered = filtered.filter(t=>t.status===statusFilter);
+
+  const body = document.getElementById('tx-body');
+  body.innerHTML = filtered.map(t=>{
+    const sc = t.score||0;
+    const pct = Math.round(sc*100);
+    const cls = sc>=(model.threshold||0.6)?'high':sc>0.5?'mid':'';
+    const statusBadge = t.status==='anomaly'
+      ? '<span class="badge anomaly">⚠ Anomaly</span>'
+      : sc>0.5 ? '<span class="badge warn">~ Suspect</span>'
+      : '<span class="badge normal">✓ Normal</span>';
+    return `<tr>
+      <td style="color:var(--muted)">${t.date}</td>
+      <td>${t.description}</td>
+      <td><span style="color:${CAT_COLORS[t.category]};font-size:11px">● ${t.category}</span></td>
+      <td class="amount ${t.amount<0?'neg':'pos'}">${t.amount<0?'-':''}₸${Math.round(Math.abs(t.amount)).toLocaleString()}</td>
+      <td style="color:var(--muted)">${t.hour}:00</td>
+      <td>
+        <span style="font-family:var(--mono);font-size:11px;color:${sc>=0.6?'var(--danger)':sc>0.5?'var(--warn)':'var(--muted)'}">${sc.toFixed(3)}</span>
+        <span class="score-bar"><span class="score-fill ${cls}" style="width:${pct}%"></span></span>
+      </td>
+      <td>${statusBadge}</td>
+      <td><button class="btn danger-btn" onclick="deleteTransaction(${t.id})" style="padding:2px 8px;font-size:10px">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function retrainModel(){
+  trainModel();
+  updateStats();
+  updateTopAnomalies();
+  initCharts();
+  renderTable();
+}
+
+function deleteTransaction(id){
+  transactions = transactions.filter(t=>t.id!==id);
+  retrainModel();
+}
+
+function addTransaction(){
+  const desc = document.getElementById('add-desc').value || 'Manual entry';
+  const amount = parseFloat(document.getElementById('add-amount').value) || 5000;
+  const cat = document.getElementById('add-cat').value;
+  const hour = parseInt(document.getElementById('add-hour').value);
+  const d = new Date();
+
+  const t = {
+    id: Date.now(),
+    date: d.toISOString().split('T')[0],
+    description: desc,
+    amount: -Math.abs(amount),
+    category: cat,
+    hour: hour,
+    day: d.getDay()
+  };
+
+  transactions.unshift(t);
+  trainModel();
+
+  const score = t.score||0;
+  const resultEl = document.getElementById('add-result');
+  resultEl.style.display = 'block';
+  if(t.status==='anomaly'){
+    resultEl.innerHTML = `⚠️ <strong style="color:var(--danger)">ANOMALY DETECTED!</strong> Score: <strong>${score.toFixed(4)}</strong> (threshold: ${(model.threshold||0).toFixed(4)})<br>Причины: необычная сумма, нестандартное время транзакции или редкая категория.`;
+    resultEl.style.borderColor = 'rgba(248,113,113,0.4)';
+  } else {
+    resultEl.innerHTML = `✅ <strong style="color:var(--success)">Normal transaction.</strong> Score: <strong>${score.toFixed(4)}</strong> (threshold: ${(model.threshold||0).toFixed(4)})`;
+    resultEl.style.borderColor = 'rgba(52,211,153,0.3)';
+  }
+
+  updateStats(); updateTopAnomalies(); initCharts(); renderTable();
+}
+
+function uploadCSV(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split('\n').filter(l=>l.trim());
+    let added = 0;
+    lines.slice(1).forEach(line=>{
+      const parts = line.split(',');
+      if(parts.length>=3){
+        const d = new Date();
+        transactions.unshift({
+          id: Date.now()+Math.random(),
+          date: parts[0]?.trim() || d.toISOString().split('T')[0],
+          description: parts[1]?.trim() || 'Imported',
+          amount: -Math.abs(parseFloat(parts[2]?.trim())||1000),
+          category: parts[3]?.trim() || 'Other',
+          hour: randInt(8,22), day: d.getDay()
+        });
+        added++;
+      }
+    });
+    const status = document.getElementById('upload-status');
+    status.style.display = 'block';
+    status.innerHTML = `✅ Загружено <strong>${added} транзакций</strong> из файла <strong>${file.name}</strong>. Модель переобучается...`;
+    retrainModel();
+  };
+  reader.readAsText(file);
+}
+
+function exportCSV(){
+  const rows = ['date,description,amount,category,hour,score,status'];
+  transactions.forEach(t=>rows.push(`${t.date},"${t.description}",${t.amount},${t.category},${t.hour},${(t.score||0).toFixed(4)},${t.status||'unknown'}`));
+  const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'finance_anomalies.csv'; a.click();
+}
+
+function switchTab(name, el){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+trainModel();
+updateStats();
+updateTopAnomalies();
+setTimeout(()=>{ initCharts(); renderTable(); }, 100);
+</script>
+</body>
+</html>
